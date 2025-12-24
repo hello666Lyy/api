@@ -1,0 +1,23 @@
+spring:
+  datasource:
+    # 驱动类（不用改，保持这个）
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 替换这里的「你的数据库名」为你MySQL中实际存在的数据库名（比如api_db）
+    url: jdbc:mysql://localhost:3306/api?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root  # 你的MySQL用户名（默认是root）
+    password: hello666  # 你的MySQL登录密码
+  # 在这里添加Redis配置（与datasource同级）
+  data:
+    redis:
+      port: 6379
+      password: hello666
+      host: localhost
+      timeout: 10000
+      database: 0
+
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.org.api_service.entity
+  configuration:
+    map-underscore-to-camel-case: true

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.org.api_service.mapper.SysUserMapper">
+    <!-- 根据AK查询有效用户 -->
+    <select id="selectByAccessKey" resultType="com.org.api_common.entity.SysUser">
+        SELECT id, username, password, access_key, secret_key, status, create_time, update_time, expire_time, permission_type
+        FROM sys_user
+        WHERE access_key = #{accessKey} AND status = 1
+    </select>
+</mapper>
