@@ -1,146 +1,102 @@
-# API项目
+# 项目介绍
 
-基于Spring Boot 3.5.0 + JDK 17的多模块微服务项目
+面向业务接口开放与接入的全栈项目，后端基于 Spring Boot 多模块架构，前端基于 Vue3 + Vite。项目提供用户认证、API 市场与权限申请、调用日志与统计、SDK 签名调用等完整能力。
 
-## 项目结构
+## 架构与模块
 
 ```
 api/
-├── api_common/          # 公共模块：工具类、实体、配置
-├── api_service/         # 业务服务模块：Mapper、Service、数据访问
-├── api_web/            # Web接口模块：Controller、API接口
-├── pom.xml             # 父POM：统一依赖版本管理
-└── build.bat           # Windows构建脚本
+├─ api_common/         公共模块：实体、DTO/VO、工具、配置
+├─ api_service/        业务服务：Mapper、Service、数据访问与业务实现
+├─ api_web/            Web 接口：Controller、拦截器、异常处理、切面
+├─ api_admin_service/  管理端服务：管理员管理 API 与权限
+├─ api_sdk/            SDK 模块：签名、Nonce、客户端封装
+├─ apivue/             前端应用：Vue3 + Vite + Element Plus
+├─ pom.xml             父 POM
+├─ build.bat           Windows 构建脚本
+└─ init_business_apis.sql  业务接口初始化 SQL
 ```
+
+- 后端入口：[ApiWebApplication.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/ApiWebApplication.java)
+- 典型控制器：
+  - 认证：[AuthController.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/controller/auth/AuthController.java)
+  - 用户：[SysUserController.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/controller/SysUserController.java)
+  - API 市场：[ApiMarketController.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/controller/ApiMarketController.java)
+  - 业务示例：时间/天气/随机数（[TimeController.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/controller/business/TimeController.java)、[WeatherController.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/controller/business/WeatherController.java)、[RandomController.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/controller/business/RandomController.java)）
+- 权限与认证：
+  - 拦截器：[JwtInterceptor.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/interceptor/JwtInterceptor.java)、[ApiPermissionInterceptor.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/interceptor/ApiPermissionInterceptor.java)
+  - 统一异常：[GlobalExceptionHandler.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/exception/GlobalExceptionHandler.java)
+  - 指标切面：[ApiMetricsAspect.java](file:///e:/study/apiCode/api/api_web/src/main/java/com/org/api_web/aspect/ApiMetricsAspect.java)
+- 公共能力：
+  - JWT 工具：[JwtUtil.java](file:///e:/study/apiCode/api/api_common/src/main/java/com/org/api_common/util/JwtUtil.java)
+  - 签名工具：[SignUtil.java](file:///e:/study/apiCode/api/api_common/src/main/java/com/org/api_common/util/SignUtil.java)
+  - Redis 工具：[RedisUtil.java](file:///e:/study/apiCode/api/api_common/src/main/java/com/org/api_common/util/RedisUtil.java)
+- SDK：
+  - 客户端入口：[ApiClient.java](file:///e:/study/apiCode/api/api_sdk/src/main/java/com/org/api_sdk/ApiClient.java)
 
 ## 技术栈
 
-- **框架**: Spring Boot 3.5.0
-- **JDK**: 17
-- **数据库**: MySQL 8.x
-- **ORM**: MyBatis-Plus 3.5.7
-- **缓存**: Redis
-- **构建**: Maven 3.x
+- 后端：Spring Boot 3.5、JDK 17、MyBatis-Plus、MySQL、Redis、Maven
+- 前端：Vue 3、Vite 5、TypeScript、Pinia、Vue Router、Element Plus、Axios
+
+## 核心功能
+
+- 用户认证：登录/校验、JWT 鉴权
+- API 市场：浏览可用接口、查看使用说明
+- 权限申请：用户申请/管理员审批、AK 状态管理
+- 调用日志：记录调用明细与统计分析
+- 业务接口：时间/天气/随机数等示例业务
+- SDK 调用：提供签名算法与客户端封装，简化调用
 
 ## 快速开始
 
-### 1. 环境准备
+### 环境准备
 
-- JDK 17 (必须)
-- MySQL 8.x
-- Redis
-- Maven 3.x
+- JDK 17、Maven 3.x、MySQL 8.x、Redis
+- Node.js 18+（前端开发）
 
-### 2. 数据库配置
+### 初始化数据库
 
-创建数据库：
-```sql
-CREATE DATABASE api CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-```
+- 创建数据库并导入业务接口初始化脚本：[init_business_apis.sql](file:///e:/study/apiCode/api/init_business_apis.sql)
 
-### 3. 项目构建
+### 构建与运行（后端）
 
-#### 方法一：使用构建脚本（推荐）
+- 一键构建（Windows）：
 
 ```bash
-# Windows环境下双击运行 build.bat
-# 或命令行执行：
 .\build.bat
 ```
 
-#### 方法二：手动构建
+- 手动构建：
 
 ```bash
-# 1. 安装公共模块
 mvn install -pl api_common -am -DskipTests
-
-# 2. 编译项目（详细日志）
-mvn compile -X
-
-# 3. 打包项目
 mvn package -DskipTests
 ```
 
-### 4. 运行项目
+- 运行 Web 接口模块：
 
 ```bash
-# 进入web模块目录
 cd api_web
-
-# 运行Spring Boot应用
 java -jar target/api_web-0.0.1-SNAPSHOT.jar
 ```
 
-应用将在 `http://localhost:8080` 启动
+- 默认端口：8080（本地联调建议在 api_web 的 application.yml 中设置为 8081 以配合前端代理）
 
-## 常见问题解决方案
+### 运行（前端）
 
-### 1. Maven依赖找不到自定义模块
-
-**问题**: `api_common` 或 `api_service` 模块找不到
-
-**解决**: 先安装公共模块到本地仓库
 ```bash
-mvn install -pl api_common -am -DskipTests
+cd apivue
+npm install
+npm run dev
 ```
 
-### 2. JDK版本不匹配
+- 开发服务器：默认 http://localhost:5173
+- 代理配置：见 [vite.config.ts](file:///e:/study/apiCode/api/apivue/vite.config.ts)，将 /api 转发到后端（默认 http://localhost:8081）
 
-**问题**: 编译错误，提示JDK版本不匹配
+## 配置参考
 
-**解决**:
-- 确保系统安装了JDK 17
-- 检查JAVA_HOME环境变量指向JDK 17
-- 项目统一使用JDK 17，不支持其他版本
-
-### 3. MySQL连接失败
-
-**问题**: `Communications link failure`
-
-**解决**:
-- 检查MySQL服务是否启动
-- 确认数据库存在：`api`
-- 检查用户名密码（默认root/hello666）
-- 确认端口（默认3306）
-
-### 4. Redis连接失败
-
-**问题**: Redis连接超时
-
-**解决**:
-- 检查Redis服务是否启动
-- 确认密码设置（默认hello666）
-- 检查端口（默认6379）
-
-### 5. 编译失败无详细日志
-
-**解决**: 使用详细日志模式
-```bash
-mvn compile -X
-```
-
-### 6. Bean定义重复
-
-**问题**: Spring启动时出现多个同名Bean
-
-**解决**:
-- 检查各模块的`@ComponentScan`和`@MapperScan`配置
-- 确保不同模块扫描不同的包路径
-- `api_web`模块已排除数据源自动配置
-
-## 开发注意事项
-
-1. **变量命名**: 使用清晰语义化的命名，避免a、b、c等无意义命名
-2. **代码注释**: 统一使用中文注释
-3. **依赖管理**: 所有依赖版本在父POM中统一管理
-4. **模块职责**:
-   - `api_common`: 公共工具类、实体类、配置
-   - `api_service`: 业务逻辑、数据访问
-   - `api_web`: 接口控制器、API定义
-
-## 项目配置
-
-### 数据库配置 (api_service/src/main/resources/application.yml)
+- 数据源与 Redis（示例，位于 api_service）：
 
 ```yaml
 spring:
@@ -152,19 +108,31 @@ spring:
 
   data:
     redis:
+      host: localhost
       port: 6379
       password: hello666
-      host: localhost
       timeout: 10000
       database: 0
 ```
 
-### 端口配置
+## 相关文档
 
-默认端口: 8080
+- SDK 使用指南（前端展示版）：[SDK使用指南-前端展示版.md](file:///e:/study/apiCode/api/SDK使用指南-前端展示版.md)
+- SDK 使用问题分析与正确使用指南：[SDK使用问题分析与正确使用指南.md](file:///e:/study/apiCode/api/SDK使用问题分析与正确使用指南.md)
+- SDK 调用业务接口方案：[SDK调用业务接口方案.md](file:///e:/study/apiCode/api/SDK调用业务接口方案.md)
+- 前端接入后端方案：[前端接入后端方案.md](file:///e:/study/apiCode/api/前端接入后端方案.md)
+- 后端接口实现完成总结：[后端接口实现完成总结.md](file:///e:/study/apiCode/api/后端接口实现完成总结.md)
 
-修改端口在 `api_web/src/main/resources/application.yml` 中添加：
-```yaml
-server:
-  port: 8081
-```
+## 目录与代码索引
+
+- 公共配置与自动装配：[CommonAutoConfiguration.java](file:///e:/study/apiCode/api/api_common/src/main/java/com/org/api_common/config/CommonAutoConfiguration.java)
+- MyBatis-Plus 配置：[MybatisPlusConfig.java](file:///e:/study/apiCode/api/api_common/src/main/java/com/org/api_common/config/MybatisPlusConfig.java)
+- 权限与统计服务（管理端）：[ApiPermissionServiceImpl.java](file:///e:/study/apiCode/api/api_admin_service/src/main/java/com/org/api_admin_service/service/serviceImpl/ApiPermissionServiceImpl.java)、[StatisticsServiceImpl.java](file:///e:/study/apiCode/api/api_admin_service/src/main/java/com/org/api_admin_service/service/serviceImpl/StatisticsServiceImpl.java)
+- 业务服务实现（通用）：[AuthServiceImpl.java](file:///e:/study/apiCode/api/api_service/src/main/java/com/org/api_service/service/serviceImpl/AuthServiceImpl.java)、[SysUserServiceImpl.java](file:///e:/study/apiCode/api/api_service/src/main/java/com/org/api_service/service/serviceImpl/SysUserServiceImpl.java)
+
+## 约定与注意事项
+
+- 统一使用 JDK 17；依赖版本由父 POM 管理
+- 模块间职责清晰，避免重复扫描与 Bean 冲突
+- 前端通过 Vite 代理访问后端 /api 前缀，联调时保持端口一致
+
